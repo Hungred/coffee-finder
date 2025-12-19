@@ -1,68 +1,57 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import 'tailwindcss';
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@theme {
+  /* --- 顏色設定 --- */
+  /* 主色調：黃色 */
+  --color-coffee-primary: #f9f506;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  /* 背景色 */
+  --color-coffee-bg-light: #f8f8f5;
+  --color-coffee-bg-dark: #23220f;
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+  /* 卡片顏色 */
+  --color-coffee-card-light: #ffffff;
+  --color-coffee-card-dark: #2d2c1b;
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
+  /* 點綴與標籤顏色 (針對「有插座」、「WiFi」等標籤) */
+  --color-accent-green: #e0f2e3;
+  --color-accent-green-dark: #2a4230;
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
+  /* 文字顏色：直接用 coffee- 開頭，簡短有力 */
+  --color-coffee-green: #2e7d32;
+  --color-coffee-green-light: #a5d6a7;
+  --color-coffee-dark: #333333; /* 深灰色標題 */
+  --color-coffee-medium: #666666; /* 中灰色內容 */
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  /* --- 字體設定 --- */
+  --font-display: 'Spline Sans', sans-serif;
+  --font-sans: 'Noto Sans TC', sans-serif;
+
+  /* --- 圓角設定 --- */
+  --radius-none: 0;
+  --radius-sm: 0.5rem;
+  --radius-default: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-full: 9999px;
+
+  /* --- 陰影設定 --- */
+  --shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+@layer base {
+  body {
+    @apply bg-coffee-bg-light text-coffee-medium antialiased;
+    font-family: var(--font-sans);
   }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-coffee-dark font-bold;
+    font-family: var(--font-display);
   }
 }
