@@ -1,23 +1,28 @@
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home.js';
+// import MapView from './pages/MapView.js';
+// import City from './pages/City.js';
+// import Favorites from './pages/Favorites.js';
+import BottomNav from './components/BottomNav.js';
 
-function App() {
+const App: React.FC = () => {
   return (
-    <>
-      <div className='min-h-screen bg-coffee-yellow p-6'>
-        <div className='bg-white rounded-card shadow-soft p-4'>
-          <h1 className='text-dark text-xl font-bold'>
-            Coffee Finder 測試成功！
-          </h1>
-          <p className='text-coffee-green-light'>
-            這是一個使用了 Tailwind v4 的測試卡片。
-          </p>
-          <button className='mt-4 bg-coffee-green px-4 py-2 rounded-full'>
-            探索咖啡廳
-          </button>
-        </div>
+    <Router>
+      <div className='max-w-md mx-auto min-h-screen bg-coffee-bg-light shadow-2xl relative flex flex-col'>
+        <main className='flex-1 overflow-y-auto'>
+          <Routes>
+            <Route path='/' element={<Home />} />
+            {/* <Route path='/map' element={<MapView />} />
+            <Route path='/city' element={<City />} />
+            <Route path='/favorites' element={<Favorites />} /> */}
+          </Routes>
+        </main>
+
+        {/* 底部導覽列：固定 */}
+        <BottomNav />
       </div>
-    </>
+    </Router>
   );
-}
+};
 
 export default App;
