@@ -9,8 +9,8 @@ import BottomNav from './components/BottomNav.js';
 const App: React.FC = () => {
   return (
     <Router>
-      <div className='max-w-md mx-auto min-h-screen bg-coffee-bg-light shadow-2xl relative flex flex-col'>
-        <main className='flex-1 overflow-y-auto'>
+      <div className='max-w-md mx-auto h-[100dvh] flex flex-col bg-coffee-bg-light shadow-2xl relative overflow-hidden'>
+        <main className='flex-1 relative min-h-0'>
           <Routes>
             <Route path='/' element={<Home />} />
             <Route path='/map' element={<MapView />} />
@@ -21,7 +21,9 @@ const App: React.FC = () => {
         </main>
 
         {/* 底部導覽列：固定 */}
-        <BottomNav />
+        <footer className='flex-none border-t border-gray-100 bg-white'>
+          <BottomNav />
+        </footer>
       </div>
     </Router>
   );
