@@ -10,8 +10,7 @@ const BottomNav: React.FC = () => {
   ];
 
   return (
-    <nav className='sticky bottom-0 w-full bg-white/70 backdrop-blur-xl border-t border-gray-100 flex justify-around items-center py-4 px-2 z-50'>
-
+    <nav className='w-full bg-white/70 backdrop-blur-xl border-t border-gray-100 flex justify-around items-center py-4 px-2 pb-2 z-50'>
       {links.map(({ to, icon: Icon, label }) => (
         <NavLink key={to} to={to}>
           {({ isActive }) => (
