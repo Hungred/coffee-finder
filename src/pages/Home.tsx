@@ -9,10 +9,12 @@ import {
 } from 'lucide-react';
 import { CAFE_DATA } from '../data/cafes.js';
 import type { Cafe } from '../types/cafe.js';
+import { useFavorites } from '../context/FavoriteContext.js';
 
 const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   type Category =
     | 'all'
@@ -134,11 +136,14 @@ const Home: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                <button className='p-2 bg-coffee-bg-light rounded-full text-gray-300 hover:text-red-500 transition-colors'>
+                <button
+                  className='p-2 bg-coffee-bg-light rounded-full text-gray-300 hover:text-red-500 transition-colors'
+                  onClick={() => toggleFavorite(cafe.id)}
+                >
                   <Heart
                     size={20}
-                    fill={cafe.isFavorite ? 'currentColor' : 'none'}
-                    className={cafe.isFavorite ? 'text-red-500' : ''}
+                    fill={isFavorite(cafe.id) ? 'currentColor' : 'none'}
+                    className={isFavorite(cafe.id) ? 'text-red-500' : ''}
                   />
                 </button>
               </div>
