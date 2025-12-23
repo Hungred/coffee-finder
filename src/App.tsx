@@ -4,6 +4,7 @@ import MapView from './pages/MapView.js';
 import City from './pages/City.js';
 import CityList from './pages/CityList.js';
 import Favorites from './pages/Favorites.js';
+import CafeDetail from './pages/CafeDetail.js';
 import BottomNav from './components/BottomNav.js';
 import { FavoriteProvider } from './context/FavoriteContext.js';
 
@@ -19,6 +20,7 @@ const App: React.FC = () => {
               <Route path='/city' element={<City />} />
               <Route path='/city/:cityId' element={<CityList />} />
               <Route path='/favorites' element={<Favorites />} />
+              <Route path='/cafe/:cafeId' element={<CafeDetail />} />
             </Routes>
           </main>
 
