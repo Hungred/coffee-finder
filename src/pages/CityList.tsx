@@ -31,7 +31,9 @@ const CityList: React.FC = () => {
         </h1>
         <button
           onClick={() =>
-            navigate('/map', { state: { center: currentCity.center } })
+            navigate('/map', {
+              state: { center: currentCity.center, cityName: currentCity.name },
+            })
           }
           className='text-coffee-green p-2'
         >
