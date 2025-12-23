@@ -1,7 +1,8 @@
 import React from 'react';
 import { useFavorites } from '../context/FavoriteContext.js';
 import { CAFE_DATA } from '../data/cafes.js';
-import { Heart, Coffee } from 'lucide-react';
+import { Coffee } from 'lucide-react';
+import CoffeeCard from '../components/CoffeeCard.js';
 
 const Favorites: React.FC = () => {
   const { favorites, toggleFavorite } = useFavorites();
@@ -20,28 +21,7 @@ const Favorites: React.FC = () => {
         {favoriteCafes.length > 0 ? (
           <div className='flex flex-col gap-6'>
             {favoriteCafes.map((cafe) => (
-              <div
-                key={cafe.id}
-                className='bg-white rounded-2xl shadow-soft overflow-hidden relative'
-              >
-                <img
-                  src={cafe.image}
-                  className='w-full h-32 object-cover'
-                  alt=''
-                />
-                <button
-                  onClick={() => toggleFavorite(cafe.id)}
-                  className='absolute top-3 right-3 p-2 bg-white/90 rounded-full text-red-500 shadow-sm'
-                >
-                  <Heart size={18} fill='currentColor' />
-                </button>
-                <div className='p-4'>
-                  <h3 className='font-bold text-coffee-dark'>{cafe.name}</h3>
-                  <p className='text-xs text-coffee-medium mt-1'>
-                    {cafe.city} · {cafe.district}
-                  </p>
-                </div>
-              </div>
+              <CoffeeCard key={cafe.id} cafe={cafe} />
             ))}
           </div>
         ) : (
