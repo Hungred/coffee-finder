@@ -2,6 +2,7 @@ import React from 'react';
 import type { Cafe } from '../types/cafe.js';
 import { Heart, MapPin, Star } from 'lucide-react';
 import { useFavorites } from '../context/FavoriteContext.js';
+import { useNavigate } from 'react-router-dom';
 
 interface CoffeeCardProps {
   cafe: Cafe;
@@ -10,6 +11,12 @@ interface CoffeeCardProps {
 
 const CoffeeCard: React.FC<CoffeeCardProps> = ({ cafe, cardHeight = '' }) => {
   const { toggleFavorite, isFavorite } = useFavorites();
+  const navigate = useNavigate();
+
+  const handleCardClick = (cafeId: number) => {
+    navigate(`/cafe/${cafeId}`);
+  };
+
   return (
     <div
       key={cafe.id}
@@ -17,6 +24,7 @@ const CoffeeCard: React.FC<CoffeeCardProps> = ({ cafe, cardHeight = '' }) => {
       style={{
         backgroundImage: `url('${cafe.image}')`,
       }}
+      onClick={() => handleCardClick(cafe.id)}
     >
       <div className='w-fit px-2.5 py-1 rounded-full bg-coffee-bg-light backdrop-blur-md text-xs font-bold text-[#181811] dark:text-white shadow-sm flex items-center gap-1'>
         <Star size={16} color='#f9f506' />
