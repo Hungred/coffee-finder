@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import { CAFE_DATA } from '../data/cafes.js';
 import { MapPin, Star } from 'lucide-react';
 import coffeeIcon from '../assets/coffee.svg';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const customIcon = new L.Icon({
   iconUrl: coffeeIcon,
@@ -45,6 +46,25 @@ const MapView: React.FC = () => {
   const [filteredCafes, setFilteredCafes] = useState(CAFE_DATA); // 搜尋結果
 
   const firstMarkerRef = useRef<L.Marker>(null);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // 1. 取得從 CityList 傳過來的 state
+  const incomingCenter = location.state?.center as [number, number] | undefined;
+  const cityName = (location.state?.cityName as string) || '';
+
+  // 2. 初始中心點
+  const initialCenter: [number, number] = incomingCenter || center;
+
+  // 3. 當組件掛載時，如果有點選城市，執行一次過濾
+  useEffect(() => {
+    if (cityName) {
+      handleSearch(cityName);
+    } else {
+      setFilteredCafes(CAFE_DATA);
+    }
+  }, [cityName]);
 
   const handleSearch = (filterString: string) => {
     setSearchQuery(filterString);
