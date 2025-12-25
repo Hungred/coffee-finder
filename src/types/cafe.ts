@@ -1,12 +1,24 @@
 export interface Cafe {
-  id: number;
+  id: string; // API 給的是 UUID 字串
   name: string;
   city: string;
-  district: string;
+  wifi: number;
+  seat: number;
+  quiet: number;
+  tasty: number;
+  cheap: number;
+  music: number;
+  url: string;
   address: string;
-  position: [number, number]; // [緯度, 經度]
-  tags: string[];
-  isFavorite: boolean;
-  score: number;
+  position: [number, number]; // 需從 API 的 latitude, longitude 轉換
+  limited_time: string;
+  socket: string;
+  standing_desk: string;
+  mrt: string;
+  open_time: string;
+  //自定義
+  tags?: string[];
+  isFavorite?: boolean;
   image?: string;
+  score?: number;
 }
