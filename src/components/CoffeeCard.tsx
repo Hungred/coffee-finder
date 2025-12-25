@@ -13,7 +13,7 @@ const CoffeeCard: React.FC<CoffeeCardProps> = ({ cafe, cardHeight = '' }) => {
   const { toggleFavorite, isFavorite } = useFavorites();
   const navigate = useNavigate();
 
-  const handleCardClick = (cafeId: number) => {
+  const handleCardClick = (cafeId: string) => {
     navigate(`/cafe/${cafeId}`);
   };
 
