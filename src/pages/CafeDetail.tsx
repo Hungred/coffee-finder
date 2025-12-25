@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ChevronLeft,
@@ -9,15 +9,25 @@ import {
   Navigation,
   Star,
 } from 'lucide-react';
-import { CAFE_DATA } from '../data/cafes.js';
 import { useFavorites } from '../context/FavoriteContext.js';
+import { fetchCafesById } from '../services/api.js';
+import type { Cafe } from '../types/cafe.js';
 
 const CafeDetail: React.FC = () => {
   const { cafeId } = useParams<{ cafeId: string }>();
   const navigate = useNavigate();
   const { toggleFavorite, isFavorite } = useFavorites();
+  const [cafe, setCafe] = useState<Cafe | null>(null);
 
-  const cafe = CAFE_DATA.find((c) => c.id === Number(cafeId));
+  useEffect(() => {
+    const loadData = async () => {
+      if (!cafeId) return;
+      const data = await fetchCafesById(cafeId);
+      if (data) setCafe(data);
+    };
+    loadData();
+  }, []);
+
   if (!cafe)
     return (
       <div className='p-10 text-center text-coffee-medium text-lg'>
@@ -84,7 +94,7 @@ const CafeDetail: React.FC = () => {
                 地址
               </p>
               <p className='text-sm text-coffee-dark font-medium leading-relaxed'>
-                {cafe.city} {cafe.district} {cafe.address || '詳細地址請洽店家'}
+                {cafe.city} {cafe.address || '詳細地址請洽店家'}
               </p>
             </div>
           </div>
@@ -98,7 +108,7 @@ const CafeDetail: React.FC = () => {
                 營業時間
               </p>
               <p className='text-sm text-coffee-dark font-medium'>
-                10:00 - 20:00 (週二公休)
+                {cafe.open_time}
               </p>
             </div>
           </div>
@@ -111,15 +121,14 @@ const CafeDetail: React.FC = () => {
               <p className='text-xs text-coffee-medium mb-1 uppercase tracking-widest font-bold'>
                 聯絡電話
               </p>
-              <p className='text-sm text-coffee-dark font-medium'>
-                02-2345-6789
-              </p>
+              <p className='text-sm text-coffee-dark font-medium'>-</p>
             </div>
           </div>
         </div>
 
         <div className='sticky flex gap-4'>
           <button
+            disabled='true'
             className='flex-1 bg-white border border-gray-100 h-14 rounded-2xl flex items-center justify-center gap-2 font-bold text-coffee-dark shadow-lg active:scale-95 transition-transform'
             onClick={() => (window.location.href = `tel:0223456789`)}
           >
