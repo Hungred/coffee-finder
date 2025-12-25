@@ -1,51 +1,63 @@
-import React, { useState } from 'react';
-import {
-  Search,
-  Heart,
-  MapPin,
-  Bell,
-  SlidersHorizontal,
-  Star,
-} from 'lucide-react';
-import { CAFE_DATA } from '../data/cafes.js';
+import React, { useState, useEffect } from 'react';
+import { Search, Bell, SlidersHorizontal } from 'lucide-react';
 import type { Cafe } from '../types/cafe.js';
-import { useFavorites } from '../context/FavoriteContext.js';
 import CoffeeCard from '../components/CoffeeCard.js';
+import { fetchCafes } from '../services/api.js';
+
+type Category = 'all' | 'wifi' | 'quiet' | 'seat' | 'limited_time';
 
 const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<string>('all');
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const [activeCategory, setActiveCategory] = useState<Category[]>([]);
+  const [cafes, setCafes] = useState<Cafe[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  type Category =
-    | 'all'
-    | 'socket'
-    | 'wifi'
-    | 'work'
-    | 'quiet'
-    | 'noTimeLimit'
-    | 'parking';
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      const data = await fetchCafes();
+      setCafes(data);
+      setLoading(false);
+    };
+    loadData();
+  }, []);
 
-  const categories = [
+  const searchCafes = async (searchQuery: string, tags: string[] = []) => {
+    const payload = {
+      searchQuery,
+      tags,
+    };
+    const data = await fetchCafes(payload);
+    setCafes(data);
+  };
+
+  const handleSearch = async (filterString: string) => {
+    setSearchQuery(filterString);
+
+    searchCafes(filterString, activeCategory);
+  };
+
+  const handleClickTags = async (tag: Category) => {
+    let newActiveCategory = [];
+    if (activeCategory.includes(tag)) {
+      // 如果已經選中，就取消
+      newActiveCategory = activeCategory.filter((v) => v !== tag);
+    } else {
+      // 如果沒選中，就加入
+      newActiveCategory = [...activeCategory, tag];
+    }
+    setActiveCategory(newActiveCategory);
+
+    searchCafes(searchQuery, newActiveCategory);
+  };
+
+  const categories: Array<{ label: string; value: Category }> = [
     { label: '全部', value: 'all' },
-    { label: '有插座', value: 'socket' },
     { label: 'WiFi', value: 'wifi' },
-    { label: '適合工作', value: 'work' },
     { label: '安靜', value: 'quiet' },
-    { label: '不限時', value: 'noTimeLimit' },
-    { label: '好停車', value: 'parking' },
+    { label: '位置多', value: 'seat' },
+    { label: '不限時', value: 'limited_time' },
   ];
-
-  const filteredCafes = CAFE_DATA.filter((cafe: Cafe) => {
-    const matchSearch =
-      cafe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cafe.city.toLowerCase().includes(searchQuery);
-
-    const matchCategory =
-      activeCategory === 'all' || cafe.tags.includes(activeCategory);
-
-    return matchSearch && matchCategory;
-  });
 
   return (
     <div className='flex flex-col h-full bg-background-light'>
@@ -82,7 +94,7 @@ const Home: React.FC = () => {
               className='w-full h-14 pl-12 pr-4 bg-white rounded-xl shadow-soft focus:ring-2 focus:ring-coffee-primary/30 outline-none text-coffee-dark placeholder:text-gray-300 transition-all border-none'
               placeholder='搜尋咖啡廳、地區或條件'
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
             />
             <div className='absolute inset-y-0 right-4 flex items-center'>
               <button className='p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors'>
@@ -97,11 +109,11 @@ const Home: React.FC = () => {
             <button
               key={item.value}
               className={`px-4 py-2 mr-3 mb-4 rounded-full  text-sm font-medium transition-colors ${
-                activeCategory === item.value
+                activeCategory.includes(item.value)
                   ? 'bg-coffee-primary'
                   : 'bg-white border border-gray-200 text-coffee-medium hover:bg-coffee-chip-hover'
               }`}
-              onClick={() => setActiveCategory(item.value)}
+              onClick={() => handleClickTags(item.value)}
             >
               {item.label}
             </button>
@@ -109,13 +121,19 @@ const Home: React.FC = () => {
         </div>
       </div>
       {/* 列表區域 */}
-      <div className='flex-1 overflow-y-auto pb-4'>
-        <div className='flex flex-col px-4 gap-y-4'>
-          {filteredCafes.map((cafe: Cafe) => (
-            <CoffeeCard key={cafe.id} cafe={cafe}></CoffeeCard>
-          ))}
+      {loading ? (
+        <div className='flex h-screen items-center justify-center text-coffee-medium'>
+          正在尋找好店... ☕️
         </div>
-      </div>
+      ) : (
+        <div className='flex-1 overflow-y-auto pb-4'>
+          <div className='flex flex-col px-4 gap-y-4'>
+            {cafes.map((cafe: Cafe) => (
+              <CoffeeCard key={cafe.id} cafe={cafe}></CoffeeCard>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
