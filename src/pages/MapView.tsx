@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { CAFE_DATA } from '../data/cafes.js';
 import { MapPin, Star } from 'lucide-react';
 import coffeeIcon from '../assets/coffee.svg';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { fetchCafes } from '../services/api.js';
+import type { Cafe } from '../types/cafe.js';
 
 const customIcon = new L.Icon({
   iconUrl: coffeeIcon,
@@ -15,76 +16,73 @@ const customIcon = new L.Icon({
 });
 
 const MapEffect: React.FC<{
-  cafes: typeof CAFE_DATA;
+  cafes: Cafe[];
   firstMarkerRef: React.RefObject<L.Marker | null>;
 }> = ({ cafes, firstMarkerRef }) => {
   const map = useMap();
 
   useEffect(() => {
-    if (cafes.length > 0) {
-      const firstCafe = cafes[0];
-      // 移動地圖
-      map.setView(firstCafe && firstCafe.position, 15);
+    if (!cafes || cafes.length === 0) return;
 
-      // 打開第一個 Marker 的 Popup
-      const timer = setTimeout(() => {
-        if (firstMarkerRef.current) {
-          firstMarkerRef.current.openPopup();
-        }
-      }, 100);
+    const firstCafe = cafes[0];
+    // 移動地圖
+    map.setView(firstCafe?.position, 15);
 
-      return () => clearTimeout(timer);
-    }
+    // 打開第一個 Marker 的 Popup
+    const timer = setTimeout(() => {
+      if (firstMarkerRef.current) {
+        firstMarkerRef.current.openPopup();
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [cafes, map, firstMarkerRef]);
 
   return null;
 };
 
 const MapView: React.FC = () => {
-  const center: [number, number] = [25.033, 121.5654];
+  const defaultCenter: [number, number] = [25.033, 121.5654];
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredCafes, setFilteredCafes] = useState(CAFE_DATA); // 搜尋結果
-
+  const [cafes, setCafes] = useState<Cafe[]>([]);
   const firstMarkerRef = useRef<L.Marker>(null);
-
+  const debounceRef = useRef<number | null>(null);
   const location = useLocation();
-  const navigate = useNavigate();
 
-  // 1. 取得從 CityList 傳過來的 state
   const incomingCenter = location.state?.center as [number, number] | undefined;
   const cityName = (location.state?.cityName as string) || '';
 
-  // 2. 初始中心點
-  const initialCenter: [number, number] = incomingCenter || center;
+  // 初始中心點
+  const initialCenter: [number, number] = incomingCenter || defaultCenter;
 
-  // 3. 當組件掛載時，如果有點選城市，執行一次過濾
+  const loadCafes = async (query?: string) => {
+    const payload = query ? { searchQuery: query } : undefined;
+    const data = await fetchCafes(payload);
+    setCafes(data);
+  };
+
   useEffect(() => {
-    if (cityName) {
-      handleSearch(cityName);
-    } else {
-      setFilteredCafes(CAFE_DATA);
-    }
+    loadCafes();
+  }, []);
+
+  useEffect(() => {
+    if (cityName) loadCafes(cityName);
   }, [cityName]);
 
-  const handleSearch = (filterString: string) => {
-    setSearchQuery(filterString);
+  const handleSearch = useCallback((value: string) => {
+    setSearchQuery(value);
 
-    const results = CAFE_DATA.filter(
-      (cafe) =>
-        cafe.name.toLowerCase().includes(filterString.toLowerCase()) ||
-        cafe.city.toLowerCase().includes(filterString.toLowerCase()) ||
-        cafe.tags.some((tag) =>
-          tag.toLowerCase().includes(filterString.toLowerCase())
-        )
-    );
+    if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    setFilteredCafes(results);
-  };
+    debounceRef.current = window.setTimeout(() => {
+      loadCafes(value);
+    }, 500);
+  }, []);
 
   return (
     <div className='h-screen w-full relative'>
       <MapContainer
-        center={center}
+        center={initialCenter}
         zoom={15}
         className='h-full w-full z-0'
         zoomControl={false}
@@ -97,32 +95,29 @@ const MapView: React.FC = () => {
           updateWhenZooming={false}
           keepBuffer={2}
         />
-        {filteredCafes.map((cafe, idx) => (
+        {cafes.map((cafe, idx) => (
           <Marker
             key={cafe.id}
             position={cafe.position}
             icon={customIcon}
-            ref={
-              idx === 0
-                ? (ref) => {
-                    (firstMarkerRef as any).current = ref;
-                  }
-                : null
-            }
+            ref={idx === 0 ? firstMarkerRef : undefined}
           >
             <Popup className='custom-popup'>
               <div className='p-2 min-w-[150px]'>
                 <img
                   src={cafe.image}
                   className='w-full h-20 object-cover rounded-md mb-2'
-                  alt=''
+                  alt={cafe.name}
                 />
                 <h4 className='font-bold text-coffee-dark text-sm'>
                   {cafe.name}
                 </h4>
                 <div className='flex flex-row flex-wrap gap-x-1 gap-y-1'>
-                  {cafe.tags.map((tag) => (
-                    <div className='flex items-center gap-1 text-[10px] text-coffee-green mt-1'>
+                  {(cafe.tags || []).map((tag, idx) => (
+                    <div
+                      key={idx}
+                      className='flex items-center gap-1 text-[10px] text-coffee-green mt-1'
+                    >
                       <Star size={10} fill='currentColor' />
                       <span>{tag}</span>
                     </div>
@@ -132,7 +127,7 @@ const MapView: React.FC = () => {
             </Popup>
           </Marker>
         ))}
-        <MapEffect cafes={filteredCafes} firstMarkerRef={firstMarkerRef} />
+        <MapEffect cafes={cafes} firstMarkerRef={firstMarkerRef} />
       </MapContainer>
       <div className='absolute top-6 left-1/2 -translate-x-1/2 z-[1000] w-[90%]'>
         <div className='bg-white/90 backdrop-blur-md h-12 rounded-full shadow-lg flex items-center px-4 border border-white'>
@@ -141,7 +136,7 @@ const MapView: React.FC = () => {
             type='text'
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
-            placeholder='搜尋咖啡廳、地區或條件'
+            placeholder='搜尋咖啡廳、地區'
             className='flex-1 bg-transparent outline-none text-sm text-coffee-medium'
           />
         </div>
