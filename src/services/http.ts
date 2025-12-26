@@ -4,8 +4,8 @@ import type { AxiosInstance } from 'axios';
 const isDev = import.meta.env.DEV;
 
 const BASE_URL = isDev
-  ? 'http://localhost:3001/api/cafes'
-  : 'https://api.allorigins.win/get?url=https://cafenomad.xyz/api/v1.2/cafes';
+  ? 'http://localhost:3000/api/cafes'
+  : 'https://coffee-finder-api-w9s6.onrender.com/api/cafes';
 
 const instance: AxiosInstance = axios.create({
   baseURL: BASE_URL,
