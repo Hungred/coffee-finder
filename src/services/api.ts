@@ -1,5 +1,7 @@
 import type { Cafe } from '../types/cafe.js';
+import type { City } from '../types/city.js';
 import http from './http.js';
+import { CITY_IMAGE_MAP } from '../tools/const.js';
 const transformCafe = (item: any): Cafe => ({
   ...item,
   latitude: parseFloat(item.latitude),
@@ -33,11 +35,34 @@ export const fetchCafes = async (payload?: {
 
 export const fetchCafesById = async (id: string): Promise<Cafe | null> => {
   try {
-    const rawData = await http.get(`/${id}`);
+    const rawData = await http.get(`/id/${id}`);
 
     return transformCafe(rawData);
   } catch (error) {
     console.error('獲取咖啡廳資料失敗', error);
     return null;
+  }
+};
+export const fetchCafesByCity = async (city: string): Promise<Cafe[]> => {
+  try {
+    const rawData = await http.get(`/city/${city}`);
+
+    return rawData.map(transformCafe);
+  } catch (error) {
+    console.error('獲取咖啡廳資料失敗', error);
+    return [];
+  }
+};
+export const fetchOptionsCity = async (): Promise<City[]> => {
+  try {
+    const rawData = await http.get(`/options/city`);
+
+    return rawData.map((city: City) => ({
+      ...city,
+      image: CITY_IMAGE_MAP[city.name] ?? CITY_IMAGE_MAP.taipei,
+    }));
+  } catch (error) {
+    console.error('獲取咖啡廳資料失敗', error);
+    return [];
   }
 };
