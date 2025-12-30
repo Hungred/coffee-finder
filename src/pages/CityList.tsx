@@ -1,21 +1,53 @@
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, Map } from 'lucide-react';
-import { CAFE_DATA } from '../data/cafes.js';
-import { CITIES } from '../data/cities.js';
-import type { City } from '../types/city.js';
 import type { Cafe } from '../types/cafe.js';
+import { fetchCafesByCity } from '../services/api.js';
+import type { City } from '../types/city.js';
 
 const CityList: React.FC = () => {
   const { cityId } = useParams<{ cityId: string }>();
   const navigate = useNavigate();
+  const [cityCafes, setCityCafes] = useState<Cafe[]>([]);
 
-  const currentCity = CITIES.find((c: City) => c.id === cityId);
-  const cityCafes = CAFE_DATA.filter(
-    (cafe: Cafe) => cafe.city === currentCity?.name
-  );
+  useEffect(() => {
+    const loadData = async () => {
+      if (!cityId) return;
+      const data = await fetchCafesByCity(cityId);
+      if (data) setCityCafes(data);
+    };
+    loadData();
+  }, []);
 
-  if (!currentCity) return <div>城市不存在</div>;
+  const location = useLocation();
+  const currentCity = location.state;
+
+  const handleCityMap = async (city: City) => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?city=${city.name}&format=json`
+      );
+      const data = await res.json();
+
+      if (!data || !data.length) {
+        console.error('找不到該城市座標');
+        return;
+      }
+
+      const cityCenter = {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon),
+      };
+
+      navigate('/map', {
+        state: { center: cityCenter, searchName: city.name },
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  if (cityCafes.length === 0) return <div>暫無咖啡廳</div>;
 
   return (
     <div className='relative h-full bg-coffee-bg-light flex flex-col'>
@@ -30,11 +62,7 @@ const CityList: React.FC = () => {
           {currentCity.name}
         </h1>
         <button
-          onClick={() =>
-            navigate('/map', {
-              state: { center: currentCity.center, cityName: currentCity.name },
-            })
-          }
+          onClick={() => handleCityMap(currentCity)}
           className='text-coffee-green p-2'
         >
           <Map size={24} />
@@ -50,6 +78,11 @@ const CityList: React.FC = () => {
             <div
               key={cafe.id}
               className='bg-coffee-card-light rounded-2xl shadow-soft overflow-hidden active:scale-[0.98] transition-all'
+              onClick={() =>
+                navigate('/map', {
+                  state: { center: cafe.position, searchName: cafe.name },
+                })
+              }
             >
               <img
                 src={cafe.image}
@@ -61,10 +94,10 @@ const CityList: React.FC = () => {
                   {cafe.name}
                 </h3>
                 <p className='text-sm text-coffee-medium mt-1'>
-                  {cafe.district}
+                  {cafe.address}
                 </p>
                 <div className='flex gap-2 mt-3'>
-                  {cafe.tags.map((tag) => (
+                  {(cafe.tags || []).map((tag) => (
                     <span
                       key={tag}
                       className='bg-accent-green text-coffee-green px-2 py-1 rounded-md text-[10px] font-bold'
