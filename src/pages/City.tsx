@@ -1,13 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CITIES } from '../data/cities.js';
 import { ChevronRight, Coffee } from 'lucide-react';
+import { fetchOptionsCity } from '../services/api.js';
+import type { City } from '../types/city.js';
 
 const City: React.FC = () => {
+  const [city, setCity] = useState<City[]>([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const data = await fetchOptionsCity();
+      setCity(data);
+    };
+    loadData();
+  }, []);
+
   const navigate = useNavigate();
 
-  const handleCitySelect = (cityId: string) => {
-    navigate(`/city/${cityId}`);
+  const handleCitySelect = (city: City) => {
+    navigate(`/city/${city.id}`, {
+      state: city,
+    });
   };
 
   return (
@@ -21,10 +34,10 @@ const City: React.FC = () => {
 
       <div className='flex-1 overflow-y-auto no-scrollbar'>
         <div className='grid grid-cols-1 gap-4'>
-          {CITIES.map((city) => (
+          {city.map((city) => (
             <div
               key={city.id}
-              onClick={() => handleCitySelect(city.id)}
+              onClick={() => handleCitySelect(city)}
               className='group relative h-40 w-full rounded-2xl overflow-hidden shadow-soft cursor-pointer active:scale-[0.98] transition-all'
             >
               <img
@@ -39,10 +52,7 @@ const City: React.FC = () => {
                 <span className='text-sm font-bold'>{city.count} Cafes</span>
               </div>
               <div className='absolute inset-y-0 left-6 flex flex-col justify-center text-white'>
-                <span className='text-xs font-bold uppercase tracking-widest opacity-80 mb-1'>
-                  {city.engName}
-                </span>
-                <h2 className='text-2xl font-bold'>{city.name}</h2>
+                <h2 className='text-2xl font-bold text-white'>{city.name}</h2>
               </div>
               <div className='absolute inset-y-0 right-6 flex items-center'>
                 <div className='bg-white/20 backdrop-blur-md p-2 rounded-full border border-white/30 text-white'>
