@@ -50,7 +50,7 @@ const MapView: React.FC = () => {
   const location = useLocation();
 
   const incomingCenter = location.state?.center as [number, number] | undefined;
-  const cityName = (location.state?.cityName as string) || '';
+  const searchName = (location.state?.searchName as string) || '';
 
   // 初始中心點
   const initialCenter: [number, number] = incomingCenter || defaultCenter;
@@ -62,12 +62,12 @@ const MapView: React.FC = () => {
   };
 
   useEffect(() => {
-    loadCafes();
-  }, []);
-
-  useEffect(() => {
-    if (cityName) loadCafes(cityName);
-  }, [cityName]);
+    if (searchName) {
+      loadCafes(searchName);
+    } else {
+      loadCafes();
+    }
+  }, [searchName]);
 
   const handleSearch = useCallback((value: string) => {
     setSearchQuery(value);

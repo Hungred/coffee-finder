@@ -139,7 +139,7 @@ const CafeDetail: React.FC = () => {
             className='flex-1 bg-coffee-primary h-14 rounded-2xl flex items-center justify-center gap-2 font-bold text-white shadow-lg active:scale-95 transition-transform'
             onClick={() =>
               navigate('/map', {
-                state: { center: cafe.position, cityName: cafe.name },
+                state: { center: cafe.position, searchName: cafe.name },
               })
             }
           >
