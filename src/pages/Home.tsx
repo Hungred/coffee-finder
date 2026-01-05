@@ -3,6 +3,7 @@ import { Search, Bell, SlidersHorizontal } from 'lucide-react';
 import type { Cafe } from '../types/cafe.js';
 import CoffeeCard from '../components/CoffeeCard.js';
 import { fetchCafes } from '../services/api.js';
+import lineImg from '../assets/line.jpg';
 
 type Category = 'all' | 'wifi' | 'quiet' | 'seat' | 'limited_time';
 
@@ -87,10 +88,7 @@ const Home: React.FC = () => {
               rel='noopener noreferrer'
             >
               <button className='flex items-center justify-center rounded-full size-10 bg-white dark:bg-card-dark shadow-sm border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-200'>
-                <img
-                  src='/src/assets/line.jpg'
-                  className='w-6 h-6 rounded-full'
-                />
+                <img src={lineImg} className='w-6 h-6 rounded-full' />
               </button>
             </a>
           </header>
