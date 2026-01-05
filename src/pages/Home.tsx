@@ -81,9 +81,18 @@ const Home: React.FC = () => {
                 </span>
               </div>
             </div>
-            <button className='flex items-center justify-center rounded-full size-10 bg-white dark:bg-card-dark shadow-sm border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-200'>
-              <Bell size={24} color='black' />
-            </button>
+            <a
+              href='https://lin.ee/NEkj0qG'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              <button className='flex items-center justify-center rounded-full size-10 bg-white dark:bg-card-dark shadow-sm border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-200'>
+                <img
+                  src='/src/assets/line.jpg'
+                  className='w-6 h-6 rounded-full'
+                />
+              </button>
+            </a>
           </header>
           <div className='relative flex items-center w-full px-4 mt-6 mb-4'>
             <div className='absolute inset-y-0 flex items-center pl-4 pointer-events-none text-gray-400'>
