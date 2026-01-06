@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, SlidersHorizontal } from 'lucide-react';
+import { Search, LogIn, LogOut, SlidersHorizontal } from 'lucide-react';
 import type { Cafe } from '../types/cafe.js';
 import CoffeeCard from '../components/CoffeeCard.js';
-import { fetchCafes } from '../services/api.js';
+import { fetchCafes, logout } from '../services/api.js';
 import lineImg from '../assets/line.jpg';
+import { useNavigate } from 'react-router-dom';
 
 type Category = 'all' | 'wifi' | 'quiet' | 'seat' | 'limited_time';
 
@@ -12,6 +13,8 @@ const Home: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<Category[]>([]);
   const [cafes, setCafes] = useState<Cafe[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
 
   useEffect(() => {
     const loadData = async () => {
@@ -60,6 +63,11 @@ const Home: React.FC = () => {
     { label: '不限時', value: 'limited_time' },
   ];
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login'); // 登出後導到登入頁
+  };
+
   return (
     <div className='flex flex-col h-full bg-background-light'>
       <div className='shrink-0 flex-none'>
@@ -81,6 +89,19 @@ const Home: React.FC = () => {
                   Coffee Lover
                 </span>
               </div>
+              {isLoggedIn ? (
+                <div onClick={() => handleLogout()}>
+                  <LogOut size={22} color='gray' />
+                </div>
+              ) : (
+                <div
+                  onClick={() => {
+                    navigate(`/login`);
+                  }}
+                >
+                  <LogIn size={22} color='gray' />
+                </div>
+              )}
             </div>
             <a
               href='https://lin.ee/NEkj0qG'

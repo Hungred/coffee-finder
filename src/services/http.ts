@@ -30,6 +30,25 @@ const instance: AxiosInstance = axios.create({
 });
 export default {
   get<T>(url: string, params?: Record<string, any>): Promise<T> {
+    instance.defaults.headers.common.Authorization = `Bearer ${localStorage.token}`;
     return instance.get<T>(url, { params }).then((res) => res.data);
+  },
+  post<T>(url: string, params?: Record<string, any>) {
+    return new Promise((resolve, reject) => {
+      instance.defaults.headers.common.Authorization = localStorage.token;
+
+      instance
+        .post(url, params)
+        .then((response) => {
+          resolve(response.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            reject(error.response.data);
+          } else {
+            reject(error.message);
+          }
+        });
+    });
   },
 };

@@ -66,3 +66,28 @@ export const fetchOptionsCity = async (): Promise<City[]> => {
     return [];
   }
 };
+
+type LoginParams = { username: string; password: string };
+
+export const login = async ({ username, password }: LoginParams) => {
+  try {
+    const res = await http.post('/login', { username, password });
+    console.log('res', res);
+    const { token } = res;
+    localStorage.setItem('token', token);
+    localStorage.setItem('isLoggedIn', true);
+
+    return token;
+  } catch (error: any) {
+    console.error('login failed', error.message);
+    return;
+  }
+};
+export const logout = async () => {
+  try {
+    const res = await http.post('/logout');
+    alert(res.message);
+    localStorage.removeItem('token'); // 刪除 token
+    localStorage.removeItem('isLoggedIn'); // 刪除 isLoggedIn
+  } catch (error: any) {}
+};
