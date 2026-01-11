@@ -2,7 +2,9 @@
 
 這是一個基於 **React** 和 **TypeScript** 開發的行動優先 (Mobile-First) 咖啡廳地圖網頁。專為「數位遊牧民族」設計，讓使用者在移動過程中，能快速在台灣各城市找到最理想的工作空間。
 
----
+## **_線上網站連結_**: https://coffee-finder-hazel.vercel.app/#/
+
+預設登入帳號密碼：1234/1234
 
 ## 🚀 技術棧 (Tech Stack)
 
@@ -39,11 +41,14 @@
 
 ```text
 src/
+├── assets/         # 圖片、icons 或其他靜態資源
 ├── components/     # 存放共用組件 (如 BottomNav)
 ├── data/           # 靜態資料中心 (城市資訊、咖啡廳清單)
 ├── pages/          # 頁面邏輯 (Home, City, CityList, MapView)
 ├── types/          # TypeScript 型別定義中心
-├── App.tsx         # 全域佈局框架與路由配置
+├── utils/          # 工具函式或共用邏輯
+├── services/       # 工具函式或共用邏輯
+├── App.tsx         # API
 └── index.css       # Tailwind 基礎設定與滾動條美化
 ```
 
