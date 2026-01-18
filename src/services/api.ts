@@ -19,6 +19,10 @@ const transformCafe = (item: any): Cafe => ({
   score: (item.wifi + item.seat + item.quiet + item.tasty) / 4,
 });
 
+interface ApiResponse<T> {
+  data: T;
+}
+
 export const fetchCafes = async (payload?: {
   searchQuery?: string;
   tags?: string[];
@@ -67,15 +71,17 @@ export const fetchOptionsCity = async (): Promise<City[]> => {
   }
 };
 
-type LoginParams = { username: string; password: string };
+type LoginParams = { email: string; password: string };
 
-export const login = async ({ username, password }: LoginParams) => {
+export const login = async ({ email, password }: LoginParams) => {
   try {
-    const res = await http.post('/login', { username, password });
-    console.log('res', res);
-    const { token } = res;
+    const res = await http.post('/login', { email, password });
+    const { token, user } = res;
     localStorage.setItem('token', token);
     localStorage.setItem('isLoggedIn', true);
+    localStorage.setItem('user_id', user.id);
+    localStorage.setItem('user_name', user.name);
+    localStorage.setItem('user_email', user.email);
 
     return token;
   } catch (error: any) {
@@ -89,5 +95,33 @@ export const logout = async () => {
     alert(res.message);
     localStorage.removeItem('token'); // 刪除 token
     localStorage.removeItem('isLoggedIn'); // 刪除 isLoggedIn
+  } catch (error: any) {}
+};
+
+export const fetchFavorites = async (): Promise<Cafe[]> => {
+  try {
+    const rawData = await http.get<Cafe[]>('/favorites');
+    console.log('獲取咖啡廳收藏資料', rawData);
+    return rawData.data.map(transformCafe);
+  } catch (error) {
+    console.error('獲取咖啡廳收藏資料失敗', error);
+    return [];
+  }
+};
+// export const fetchFavorites = async (): Promise<Cafe[]> => {
+//   try {
+//     const rawData = await http.get<ApiResponse<Cafe[]>>('/favorites');
+//     console.log('獲取咖啡廳收藏資料', rawData);
+//     return rawData.data.map(transformCafe); // 這裡才有 data
+//   } catch (error) {
+//     console.error('獲取咖啡廳收藏資料失敗', error);
+//     return [];
+//   }
+// };
+
+export const toggleFavorite = async (id: string) => {
+  try {
+    const res = await http.post('/favorites/toggle', { cafeId: id });
+    return res;
   } catch (error: any) {}
 };

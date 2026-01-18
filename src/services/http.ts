@@ -35,7 +35,7 @@ export default {
   },
   post<T>(url: string, params?: Record<string, any>) {
     return new Promise((resolve, reject) => {
-      instance.defaults.headers.common.Authorization = localStorage.token;
+      instance.defaults.headers.common.Authorization = `Bearer ${localStorage.token}`;
 
       instance
         .post(url, params)

@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { login } from '../services/api.js';
 
 const LogIn: React.FC = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const token = await login({ username, password });
+    const token = await login({ email, password });
     if (token) {
       alert('登入成功！');
       navigate('/'); // 跳轉回首頁
@@ -29,7 +29,7 @@ const LogIn: React.FC = () => {
           <input
             placeholder='帳號'
             className='w-full p-4 bg-gray-50 rounded-xl outline-none'
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <input
             type='password'
