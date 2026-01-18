@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, LogIn, LogOut, SlidersHorizontal } from 'lucide-react';
 import type { Cafe } from '../types/cafe.js';
 import CoffeeCard from '../components/CoffeeCard.js';
@@ -7,6 +7,16 @@ import lineImg from '../assets/line.jpg';
 import { useNavigate } from 'react-router-dom';
 
 type Category = 'all' | 'wifi' | 'quiet' | 'seat' | 'limited_time';
+
+function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
+  let timeout: ReturnType<typeof setTimeout>;
+  return function (...args: Parameters<T>) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+}
 
 const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,10 +45,16 @@ const Home: React.FC = () => {
     setCafes(data);
   };
 
+  const debouncedSearch = useRef(
+    debounce((value: string) => {
+      searchCafes(value, activeCategory);
+    }, 500)
+  );
+
   const handleSearch = async (filterString: string) => {
     setSearchQuery(filterString);
 
-    searchCafes(filterString, activeCategory);
+    debouncedSearch.current(filterString);
   };
 
   const handleClickTags = async (tag: Category) => {
