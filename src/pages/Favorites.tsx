@@ -1,13 +1,10 @@
 import React from 'react';
 import { useFavorites } from '../context/FavoriteContext.js';
-import { CAFE_DATA } from '../data/cafes.js';
 import { Coffee } from 'lucide-react';
 import CoffeeCard from '../components/CoffeeCard.js';
 
 const Favorites: React.FC = () => {
-  const { favorites, toggleFavorite } = useFavorites();
-
-  const favoriteCafes = CAFE_DATA.filter((cafe) => favorites.includes(cafe.id));
+  const { favorites } = useFavorites();
 
   return (
     <div className='flex flex-col relative h-full bg-coffee-bg-light px-6 pt-10'>
@@ -18,9 +15,9 @@ const Favorites: React.FC = () => {
         <p className='text-coffee-medium mt-2'>儲存你最愛的口袋名單</p>
       </header>
       <div className='flex-1 overflow-y-auto pt-4'>
-        {favoriteCafes.length > 0 ? (
+        {favorites.length > 0 ? (
           <div className='flex flex-col gap-6'>
-            {favoriteCafes.map((cafe) => (
+            {favorites.map((cafe) => (
               <CoffeeCard key={cafe.id} cafe={cafe} />
             ))}
           </div>

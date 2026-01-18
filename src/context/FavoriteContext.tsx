@@ -1,35 +1,43 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import {
+  fetchFavorites,
+  toggleFavorite as toggleFavoriteApi,
+} from '../services/api.js';
+import type { Cafe } from '../types/cafe.js';
 
 interface FavoriteContextType {
-  favorites: number[]; // 存咖啡廳的 ID
-  toggleFavorite: (id: number) => void;
-  isFavorite: (id: number) => boolean;
+  favorites: Cafe[]; // 存收藏的咖啡廳
+  toggleFavorite: (id: string) => void;
+  isFavorite: (id: string) => boolean;
 }
 
-const FavoriteContext = createContext<FavoriteContextType | undefined>(undefined);
+const FavoriteContext = createContext<FavoriteContextType | undefined>(
+  undefined
+);
 
-export const FavoriteProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [favorites, setFavorites] = useState<number[]>([]);
+export const FavoriteProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [favorites, setFavorites] = useState<Cafe[]>([]);
 
-  // 初始化：從 localStorage 讀取已收藏的 ID
   useEffect(() => {
-    const saved = localStorage.getItem('coffee_favorites');
-    if (saved) {
-      setFavorites(JSON.parse(saved));
-    }
+    const loadData = async () => {
+      const data = await fetchFavorites();
+      if (data) setFavorites(data);
+    };
+    loadData();
   }, []);
 
   // 切換收藏狀態
-  const toggleFavorite = (id: number) => {
-    const newFavorites = favorites.includes(id)
-      ? favorites.filter((favId) => favId !== id) // 移除
-      : [...favorites, id]; // 新增
+  const toggleFavorite = async (id: string) => {
+    const result = await toggleFavoriteApi(id);
+    if (!result.success) return;
 
-    setFavorites(newFavorites);
-    localStorage.setItem('coffee_favorites', JSON.stringify(newFavorites));
+    const data = await fetchFavorites();
+    if (data) setFavorites(data);
   };
 
-  const isFavorite = (id: number) => favorites.includes(id);
+  const isFavorite = (id: string) => favorites.some((f) => f.id === id);
 
   return (
     <FavoriteContext.Provider value={{ favorites, toggleFavorite, isFavorite }}>
@@ -40,6 +48,7 @@ export const FavoriteProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 export const useFavorites = () => {
   const context = useContext(FavoriteContext);
-  if (!context) throw new Error('useFavorites must be used within FavoriteProvider');
+  if (!context)
+    throw new Error('useFavorites must be used within FavoriteProvider');
   return context;
 };
