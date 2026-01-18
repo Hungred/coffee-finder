@@ -128,7 +128,7 @@ const CafeDetail: React.FC = () => {
 
         <div className='sticky flex gap-4'>
           <button
-            disabled='true'
+            disabled={true}
             className='flex-1 bg-white border border-gray-100 h-14 rounded-2xl flex items-center justify-center gap-2 font-bold text-coffee-dark shadow-lg active:scale-95 transition-transform'
             onClick={() => (window.location.href = `tel:0223456789`)}
           >
