@@ -2,6 +2,18 @@ import type { Cafe } from '../types/cafe.js';
 import type { City } from '../types/city.js';
 import http from './http.js';
 import { CITY_IMAGE_MAP } from '../tools/const.js';
+import type {
+  ApiResponse,
+  fetchCafesRes,
+  fetchCafesByIdRes,
+  fetchCafesByCityRes,
+  fetchOptionsCityRes,
+  loginRes,
+  logoutRes,
+  fetchFavoritesRes,
+  toggleFavoriteRes,
+} from '../types/api.js';
+
 const transformCafe = (item: any): Cafe => ({
   ...item,
   latitude: parseFloat(item.latitude),
@@ -19,18 +31,13 @@ const transformCafe = (item: any): Cafe => ({
   score: (item.wifi + item.seat + item.quiet + item.tasty) / 4,
 });
 
-interface ApiResponse<T> {
-  data: T;
-}
-
 export const fetchCafes = async (payload?: {
   searchQuery?: string;
   tags?: string[];
 }): Promise<Cafe[]> => {
   try {
-    const rawData = await http.get<Cafe[]>('', payload);
-
-    return rawData.map(transformCafe);
+    const res = await http.get<fetchCafesRes>('', payload);
+    return res.data.cafes.map(transformCafe);
   } catch (error) {
     console.error('獲取咖啡廳資料失敗', error);
     return [];
@@ -39,19 +46,20 @@ export const fetchCafes = async (payload?: {
 
 export const fetchCafesById = async (id: string): Promise<Cafe | null> => {
   try {
-    const rawData = await http.get(`/id/${id}`);
+    const res = await http.get<fetchCafesByIdRes>(`/id/${id}`);
 
-    return transformCafe(rawData);
+    return transformCafe(res.data.cafe);
   } catch (error) {
     console.error('獲取咖啡廳資料失敗', error);
     return null;
   }
 };
+
 export const fetchCafesByCity = async (city: string): Promise<Cafe[]> => {
   try {
-    const rawData = await http.get(`/city/${city}`);
+    const res = await http.get<fetchCafesByCityRes>(`/city/${city}`);
 
-    return rawData.map(transformCafe);
+    return res.data.cafes.map(transformCafe);
   } catch (error) {
     console.error('獲取咖啡廳資料失敗', error);
     return [];
@@ -59,9 +67,9 @@ export const fetchCafesByCity = async (city: string): Promise<Cafe[]> => {
 };
 export const fetchOptionsCity = async (): Promise<City[]> => {
   try {
-    const rawData = await http.get(`/options/city`);
+    const res = await http.get<fetchOptionsCityRes>(`/options/city`);
 
-    return rawData.map((city: City) => ({
+    return res.data.cities.map((city: City) => ({
       ...city,
       image: CITY_IMAGE_MAP[city.name] ?? CITY_IMAGE_MAP.taipei,
     }));
@@ -75,8 +83,9 @@ type LoginParams = { email: string; password: string };
 
 export const login = async ({ email, password }: LoginParams) => {
   try {
-    const res = await http.post('/login', { email, password });
-    const { token, user } = res;
+    const res = await http.post<loginRes>('/login', { email, password });
+    const { token, user } = res.data;
+
     localStorage.setItem('token', token);
     localStorage.setItem('isLoggedIn', true);
     localStorage.setItem('user_id', user.id);
@@ -89,10 +98,12 @@ export const login = async ({ email, password }: LoginParams) => {
     return;
   }
 };
+
 export const logout = async () => {
   try {
-    const res = await http.post('/logout');
-    alert(res.message);
+    const res = (await http.post<logoutRes>('/logout')) as logoutRes;
+    alert(res.data.message);
+
     localStorage.removeItem('token'); // 刪除 token
     localStorage.removeItem('isLoggedIn'); // 刪除 isLoggedIn
   } catch (error: any) {}
@@ -100,28 +111,20 @@ export const logout = async () => {
 
 export const fetchFavorites = async (): Promise<Cafe[]> => {
   try {
-    const rawData = await http.get<Cafe[]>('/favorites');
-    console.log('獲取咖啡廳收藏資料', rawData);
-    return rawData.data.map(transformCafe);
+    const res = await http.get<fetchFavoritesRes>('/favorites');
+    console.log('獲取咖啡廳收藏資料', res.data.cafes);
+    return res.data.cafes.map(transformCafe);
   } catch (error) {
     console.error('獲取咖啡廳收藏資料失敗', error);
     return [];
   }
 };
-// export const fetchFavorites = async (): Promise<Cafe[]> => {
-//   try {
-//     const rawData = await http.get<ApiResponse<Cafe[]>>('/favorites');
-//     console.log('獲取咖啡廳收藏資料', rawData);
-//     return rawData.data.map(transformCafe); // 這裡才有 data
-//   } catch (error) {
-//     console.error('獲取咖啡廳收藏資料失敗', error);
-//     return [];
-//   }
-// };
 
 export const toggleFavorite = async (id: string) => {
   try {
-    const res = await http.post('/favorites/toggle', { cafeId: id });
-    return res;
+    const res = (await http.post<toggleFavoriteRes>('/favorites/toggle', {
+      cafeId: id,
+    })) as toggleFavoriteRes;
+    return res.data;
   } catch (error: any) {}
 };
