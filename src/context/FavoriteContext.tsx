@@ -30,6 +30,14 @@ export const FavoriteProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // 切換收藏狀態
   const toggleFavorite = async (id: string) => {
+    const token = localStorage.getItem('token');
+
+    // 如果沒有 Token，就導向登入頁面
+    if (!token) {
+      window.location.href = '/#/login';
+      return;
+    }
+
     const result = await toggleFavoriteApi(id);
     if (!result.success) return;
 
