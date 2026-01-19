@@ -43,6 +43,7 @@ const LogIn: React.FC = () => {
           >
             登入
           </button>
+          <span>測試帳號：test@test.com / 1234</span>
         </form>
       </div>
     </div>
