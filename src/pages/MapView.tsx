@@ -7,6 +7,7 @@ import coffeeIcon from '../assets/coffee.svg';
 import { useLocation } from 'react-router-dom';
 import { fetchCafes } from '../services/api.js';
 import type { Cafe } from '../types/cafe.js';
+import { useNavigate } from 'react-router-dom';
 
 const customIcon = new L.Icon({
   iconUrl: coffeeIcon,
@@ -48,6 +49,7 @@ const MapView: React.FC = () => {
   const firstMarkerRef = useRef<L.Marker>(null);
   const debounceRef = useRef<number | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const incomingCenter = location.state?.center as [number, number] | undefined;
   const searchName = (location.state?.searchName as string) || '';
@@ -79,6 +81,10 @@ const MapView: React.FC = () => {
     }, 500);
   }, []);
 
+  const handleCardClick = (cafeId: string) => {
+    navigate(`/cafe/${cafeId}`);
+  };
+
   return (
     <div className='h-screen w-full relative'>
       <MapContainer
@@ -103,7 +109,10 @@ const MapView: React.FC = () => {
             ref={idx === 0 ? firstMarkerRef : undefined}
           >
             <Popup className='custom-popup'>
-              <div className='p-2 min-w-[150px]'>
+              <div
+                className='p-2 min-w-[150px]'
+                onClick={() => handleCardClick(cafe.id)}
+              >
                 <img
                   src={cafe.image}
                   className='w-full h-20 object-cover rounded-md mb-2'
