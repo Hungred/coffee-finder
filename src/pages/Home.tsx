@@ -24,69 +24,88 @@ const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<Category[]>([]);
   const [cafes, setCafes] = useState<Cafe[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const isLoggedIn = localStorage.getItem('isLoggedIn');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      const data = await fetchCafes({
-        page_size: PAGE_SIZE,
-        page: page ? page : 1,
-      });
-      setCafes(data);
-      setLoading(false);
-    };
-    loadData();
-  }, []);
+  const searchCafes = async (option?: { append?: boolean }) => {
+    if (loading) return;
 
-  const searchCafes = async (
-    searchQuery: string,
-    tags: string[] = [],
-    page = 1,
-    append = false
-  ) => {
+    setLoading(true);
+
     const payload = {
       searchQuery,
-      tags,
+      tags: activeCategory,
+      page,
       page_size: PAGE_SIZE,
-      page: page ? page : 1,
     };
     const data = await fetchCafes(payload);
-    if (data.length < PAGE_SIZE) {
-      setHasMore(false);
-    }
-    setCafes((prev) => (append ? [...prev, ...data] : data));
+
+    setHasMore(data.length < PAGE_SIZE ? false : true);
+
+    setCafes((prev) => (option?.append ? [...prev, ...data] : data));
+
+    setLoading(false);
   };
 
-  const debouncedSearch = useRef(
+  useEffect(() => {
+    searchCafes({ append: page > 1 });
+  }, [page, searchQuery, activeCategory]);
+
+  const debouncedSetQuery = useRef(
     debounce((value: string) => {
-      searchCafes(value, activeCategory, 1, false);
+      setPage(1);
+      setHasMore(true);
+      setSearchQuery(value);
     }, 500)
   );
 
-  const handleSearch = async (filterString: string) => {
-    setSearchQuery(filterString);
+  const handleSearch = (value: string) => {
+    debouncedSetQuery.current(value);
+  };
 
+  const handleClickTags = (tag: Category) => {
     setPage(1);
     setHasMore(true);
 
-    debouncedSearch.current(filterString);
+    setActiveCategory((prev) => {
+      // 如果點的是 all：直接只留 ['all']
+      if (tag === 'all') {
+        return ['all'];
+      }
+
+      // 不是 all 的情況
+      const withoutAll = prev.filter((v) => v !== 'all');
+
+      // 原本已包含該 tag → 取消選取
+      if (withoutAll.includes(tag)) {
+        const next = withoutAll.filter((v) => v !== tag);
+        // 如果全部都被取消了，回到 ['all']
+        return next.length === 0 ? ['all'] : next;
+      }
+
+      // 原本不包含該 tag → 加進去
+      return [...withoutAll, tag];
+    });
   };
 
-  const handleClickTags = async (tag: Category) => {
-    let newActiveCategory = [];
-    if (activeCategory.includes(tag)) {
-      // 如果已經選中，就取消
-      newActiveCategory = activeCategory.filter((v) => v !== tag);
-    } else {
-      // 如果沒選中，就加入
-      newActiveCategory = [...activeCategory, tag];
-    }
-    setActiveCategory(newActiveCategory);
+  const listRef = useRef<HTMLDivElement>(null);
+  const throttleTimer = useRef<number | null>(null);
 
-    searchCafes(searchQuery, newActiveCategory);
+  const handleScroll = () => {
+    if (throttleTimer.current) return;
+
+    const div = listRef.current;
+    if (!div || loading || !hasMore) return;
+
+    throttleTimer.current = window.setTimeout(() => {
+      if (div.scrollTop + div.clientHeight >= div.scrollHeight - 50) {
+        setPage((prev) => prev + 1);
+      }
+      throttleTimer.current = null;
+    }, 300);
   };
 
   const categories: Array<{ label: string; value: Category }> = [
@@ -100,29 +119,6 @@ const Home: React.FC = () => {
   const handleLogout = () => {
     logout();
     navigate('/login'); // 登出後導到登入頁
-  };
-
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const listRef = useRef<HTMLDivElement>(null);
-
-  const throttleTimer = useRef<null>(null);
-  const handleScroll = () => {
-    if (throttleTimer.current) return;
-
-    const div = listRef.current;
-    if (!div || loading || !hasMore) return;
-
-    throttleTimer.current = setTimeout(() => {
-      if (div.scrollTop + div.clientHeight >= div.scrollHeight - 50) {
-        const nextPage = page + 1;
-        setPage(nextPage);
-
-        searchCafes(searchQuery, activeCategory, nextPage, true);
-        // searchCafes(searchQuery);
-      }
-      throttleTimer.current = null;
-    }, 500);
   };
 
   return (
