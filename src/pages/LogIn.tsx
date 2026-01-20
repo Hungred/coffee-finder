@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/api.js';
+import { useFavorites } from '../context/FavoriteContext.js';
 
 const LogIn: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { getFavorites } = useFavorites();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -13,6 +15,7 @@ const LogIn: React.FC = () => {
     const token = await login({ email, password });
     if (token) {
       alert('登入成功！');
+      await getFavorites();
       navigate('/'); // 跳轉回首頁
     } else {
       alert('登入失敗');

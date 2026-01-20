@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFavorites } from '../context/FavoriteContext.js';
 import { Coffee } from 'lucide-react';
 import CoffeeCard from '../components/CoffeeCard.js';
 
 const Favorites: React.FC = () => {
-  const { favorites } = useFavorites();
+  const { favorites, getFavorites } = useFavorites();
+
+  useEffect(() => {
+    getFavorites();
+  }, []);
 
   return (
     <div className='flex flex-col relative h-full bg-coffee-bg-light px-6 pt-10'>

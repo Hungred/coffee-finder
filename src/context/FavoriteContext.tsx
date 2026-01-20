@@ -9,6 +9,7 @@ interface FavoriteContextType {
   favorites: Cafe[]; // 存收藏的咖啡廳
   toggleFavorite: (id: string) => void;
   isFavorite: (id: string) => boolean;
+  getFavorites: () => Promise<void>;
 }
 
 const FavoriteContext = createContext<FavoriteContextType | undefined>(
@@ -21,12 +22,21 @@ export const FavoriteProvider: React.FC<{ children: React.ReactNode }> = ({
   const [favorites, setFavorites] = useState<Cafe[]>([]);
 
   useEffect(() => {
+    const isLoggedIn = Boolean(localStorage.getItem('isLoggedIn'));
+    if (!isLoggedIn) {
+      setFavorites([]); // 登出就清空收藏
+      return;
+    }
     const loadData = async () => {
-      const data = await fetchFavorites();
-      if (data) setFavorites(data);
+      getFavorites();
     };
     loadData();
   }, []);
+
+  const getFavorites = async () => {
+    const data = await fetchFavorites();
+    if (data) setFavorites(data);
+  };
 
   // 切換收藏狀態
   const toggleFavorite = async (id: string) => {
@@ -41,14 +51,15 @@ export const FavoriteProvider: React.FC<{ children: React.ReactNode }> = ({
     const result = await toggleFavoriteApi(id);
     if (!result.success) return;
 
-    const data = await fetchFavorites();
-    if (data) setFavorites(data);
+    getFavorites();
   };
 
   const isFavorite = (id: string) => favorites.some((f) => f.id === id);
 
   return (
-    <FavoriteContext.Provider value={{ favorites, toggleFavorite, isFavorite }}>
+    <FavoriteContext.Provider
+      value={{ favorites, toggleFavorite, isFavorite, getFavorites }}
+    >
       {children}
     </FavoriteContext.Provider>
   );
