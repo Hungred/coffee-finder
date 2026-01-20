@@ -18,6 +18,8 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
   };
 }
 
+const PAGE_SIZE = 10;
+
 const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<Category[]>([]);
@@ -29,30 +31,46 @@ const Home: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      const data = await fetchCafes();
+      const data = await fetchCafes({
+        page_size: PAGE_SIZE,
+        page: page ? page : 1,
+      });
       setCafes(data);
       setLoading(false);
     };
     loadData();
   }, []);
 
-  const searchCafes = async (searchQuery: string, tags: string[] = []) => {
+  const searchCafes = async (
+    searchQuery: string,
+    tags: string[] = [],
+    page = 1,
+    append = false
+  ) => {
     const payload = {
       searchQuery,
       tags,
+      page_size: PAGE_SIZE,
+      page: page ? page : 1,
     };
     const data = await fetchCafes(payload);
-    setCafes(data);
+    if (data.length < PAGE_SIZE) {
+      setHasMore(false);
+    }
+    setCafes((prev) => (append ? [...prev, ...data] : data));
   };
 
   const debouncedSearch = useRef(
     debounce((value: string) => {
-      searchCafes(value, activeCategory);
+      searchCafes(value, activeCategory, 1, false);
     }, 500)
   );
 
   const handleSearch = async (filterString: string) => {
     setSearchQuery(filterString);
+
+    setPage(1);
+    setHasMore(true);
 
     debouncedSearch.current(filterString);
   };
@@ -82,6 +100,29 @@ const Home: React.FC = () => {
   const handleLogout = () => {
     logout();
     navigate('/login'); // 登出後導到登入頁
+  };
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const throttleTimer = useRef<null>(null);
+  const handleScroll = () => {
+    if (throttleTimer.current) return;
+
+    const div = listRef.current;
+    if (!div || loading || !hasMore) return;
+
+    throttleTimer.current = setTimeout(() => {
+      if (div.scrollTop + div.clientHeight >= div.scrollHeight - 50) {
+        const nextPage = page + 1;
+        setPage(nextPage);
+
+        searchCafes(searchQuery, activeCategory, nextPage, true);
+        // searchCafes(searchQuery);
+      }
+      throttleTimer.current = null;
+    }, 500);
   };
 
   return (
@@ -170,7 +211,11 @@ const Home: React.FC = () => {
           正在尋找好店... ☕️
         </div>
       ) : (
-        <div className='flex-1 overflow-y-auto pb-4'>
+        <div
+          className='flex-1 overflow-y-auto pb-4'
+          ref={listRef}
+          onScroll={handleScroll}
+        >
           <div className='flex flex-col px-4 gap-y-4'>
             {cafes.map((cafe: Cafe) => (
               <CoffeeCard key={cafe.id} cafe={cafe}></CoffeeCard>

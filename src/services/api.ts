@@ -34,6 +34,8 @@ const transformCafe = (item: any): Cafe => ({
 export const fetchCafes = async (payload?: {
   searchQuery?: string;
   tags?: string[];
+  page_size?: number;
+  page?: number;
 }): Promise<Cafe[]> => {
   try {
     const res = await http.get<fetchCafesRes>('', payload);
