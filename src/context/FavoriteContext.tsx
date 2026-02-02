@@ -10,10 +10,11 @@ interface FavoriteContextType {
   toggleFavorite: (id: string) => void;
   isFavorite: (id: string) => boolean;
   getFavorites: () => Promise<void>;
+  setFavorites: React.Dispatch<React.SetStateAction<Cafe[]>>;
 }
 
 const FavoriteContext = createContext<FavoriteContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export const FavoriteProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -58,7 +59,13 @@ export const FavoriteProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <FavoriteContext.Provider
-      value={{ favorites, toggleFavorite, isFavorite, getFavorites }}
+      value={{
+        favorites,
+        toggleFavorite,
+        isFavorite,
+        getFavorites,
+        setFavorites,
+      }}
     >
       {children}
     </FavoriteContext.Provider>

@@ -5,6 +5,7 @@ import CoffeeCard from '../components/CoffeeCard.js';
 import { fetchCafes, logout } from '../services/api.js';
 import lineImg from '../assets/line.jpg';
 import { useNavigate } from 'react-router-dom';
+import { useFavorites } from '../context/FavoriteContext.js';
 
 type Category = 'all' | 'wifi' | 'quiet' | 'seat' | 'limited_time';
 
@@ -29,6 +30,7 @@ const Home: React.FC = () => {
   const isLoggedIn = localStorage.getItem('isLoggedIn');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const { setFavorites } = useFavorites();
 
   const searchCafes = async (option?: { append?: boolean }) => {
     if (loading) return;
@@ -119,6 +121,7 @@ const Home: React.FC = () => {
   const handleLogout = () => {
     logout();
     navigate('/login'); // 登出後導到登入頁
+    setFavorites([]);
   };
 
   return (
