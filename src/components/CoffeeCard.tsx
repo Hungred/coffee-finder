@@ -34,12 +34,10 @@ const CoffeeCard: React.FC<CoffeeCardProps> = ({ cafe, cardHeight = '' }) => {
       </div>
       <div className='flex justify-between items-start'>
         <div>
-          <h3 className='text-lg font-bold text-coffee-dark group-hover:text-black transition-colors mb-1'>
-            {cafe.name}
-          </h3>
-          <div className='flex items-center gap-1 text-xs text-coffee-medium font-medium '>
-            <MapPin size={12} />
-            <span>
+          <h3 className='text-gradient'>{cafe.name}</h3>
+          <div className='text-gradient text-coffee-medium flex items-center gap-1 text-xs'>
+            <MapPin size={12} color='#f9f506' />
+            <span className=''>
               {cafe.city} · {cafe.district}
             </span>
           </div>
@@ -66,6 +64,16 @@ const CoffeeCard: React.FC<CoffeeCardProps> = ({ cafe, cardHeight = '' }) => {
           </span>
         ))}
       </div>
+      <style>
+        {`
+          .text-gradient {
+            background-image: linear-gradient(to top, #f9f506, #fff7db 50%, #ffd579);
+            background-clip: text;
+            -webkit-text-fill-color: black;
+            -webkit-text-stroke: 2px transparent;
+          }
+        `}
+      </style>
     </div>
   );
 };
