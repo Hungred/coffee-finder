@@ -23,7 +23,7 @@ const transformCafe = (item: any): Cafe => ({
   tags: [
     item.wifi >= 4 ? 'WiFi穩' : '',
     item.quiet >= 4 ? '安靜' : '',
-    item.seat >= 4 ? '位子多' : '',
+    item.seat >= 4 ? '位置多' : '',
     item.limited_time === 'no' ? '不限時' : '',
   ].filter(Boolean),
   isFavorite: false,
