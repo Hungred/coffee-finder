@@ -23,6 +23,7 @@ const PAGE_SIZE = 10;
 
 const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [inputValue, setInputValue] = useState('');
   const [activeCategory, setActiveCategory] = useState<Category[]>([]);
   const [cafes, setCafes] = useState<Cafe[]>([]);
   const [loading, setLoading] = useState(false);
@@ -61,10 +62,11 @@ const Home: React.FC = () => {
       setPage(1);
       setHasMore(true);
       setSearchQuery(value);
-    }, 500)
+    }, 500),
   );
 
   const handleSearch = (value: string) => {
+    setInputValue(value);
     debouncedSetQuery.current(value);
   };
 
@@ -177,7 +179,7 @@ const Home: React.FC = () => {
               type='text'
               className='w-full h-14 pl-12 pr-4 bg-white rounded-xl shadow-soft focus:ring-2 focus:ring-coffee-primary/30 outline-none text-coffee-dark placeholder:text-gray-300 transition-all border-none'
               placeholder='搜尋咖啡廳、地區或條件'
-              value={searchQuery}
+              value={inputValue}
               onChange={(e) => handleSearch(e.target.value)}
             />
             <div className='absolute inset-y-0 right-4 flex items-center'>
